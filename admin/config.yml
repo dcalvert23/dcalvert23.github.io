@@ -1,0 +1,114 @@
+# Sveltia CMS config — mirrors src/content.config.js.
+# If you add/rename a field in content.config.js, update the matching
+# collection/field here too, or the admin form will drift from the schema.
+
+backend:
+  name: github
+  repo: dcalvert23/danielcalvert-site
+  branch: main
+  # Sveltia CMS authenticates against GitHub via an OAuth flow that needs a
+  # small proxy (GitHub doesn't allow pure-static apps to complete OAuth).
+  # That proxy is a Cloudflare Worker (sveltia-cms-auth) — see DEPLOY.md
+  # "Sveltia CMS auth worker" section for the one-time setup. Nothing will
+  # log in at /admin until that worker exists and base_url below points to it.
+  # base_url: https://sveltia-cms-auth.<your-subdomain>.workers.dev
+
+media_folder: 'src/assets/works'
+public_folder: '/src/assets/works'
+
+editorial_workflow: false
+
+collections:
+  - name: works
+    label: Works
+    label_singular: Work
+    folder: src/content/works
+    create: true
+    slug: '{{title}}'
+    identifier_field: title
+    fields:
+      - { name: title, label: Title, widget: string }
+      # year + dimensions are optional — leave blank if not yet confirmed;
+      # captions omit missing fields automatically (never write "TBC").
+      - { name: year, label: Year, widget: number, value_type: int, required: false }
+      - { name: medium, label: Medium, widget: string }
+      - {
+          name: dimensions,
+          label: Dimensions,
+          widget: string,
+          required: false,
+          hint: 'e.g. "75 × 90 cm" — use ×, not x. Leave blank if unconfirmed.',
+        }
+      - name: availability
+        label: Availability
+        widget: select
+        options: [available, sold, reserved, nfs]
+        default: available
+      - {
+          name: featured,
+          label: 'Featured (eligible for home hero)',
+          widget: boolean,
+          default: false,
+        }
+      - { name: order, label: 'Display order', widget: number, value_type: int, default: 0 }
+      - { name: image, label: Image, widget: image }
+      - {
+          name: panelA,
+          label: 'Panel A (diptych, optional)',
+          widget: image,
+          required: false,
+          hint: 'Only for multi-panel works, e.g. Which Way? — leave blank otherwise.',
+        }
+      - {
+          name: panelB,
+          label: 'Panel B (diptych, optional)',
+          widget: image,
+          required: false,
+          hint: 'Only for multi-panel works, e.g. Which Way? — leave blank otherwise.',
+        }
+      - { name: alt, label: 'Alt text', widget: string }
+      - { name: notes, label: Notes, widget: text, required: false }
+
+  - name: exhibitions
+    label: Exhibitions
+    label_singular: Exhibition
+    folder: src/content/exhibitions
+    create: true
+    slug: '{{year}}-{{title}}'
+    identifier_field: title
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: venue, label: Venue, widget: string }
+      - { name: city, label: City, widget: string }
+      - { name: year, label: Year, widget: number, value_type: int }
+      - name: type
+        label: Type
+        widget: select
+        options: [solo, group]
+      - { name: dates, label: 'Dates (optional, free text)', widget: string, required: false }
+      - { name: note, label: Note, widget: text, required: false }
+      - { name: upcoming, label: Upcoming, widget: boolean, default: false }
+
+  - name: about
+    label: About
+    delete: false
+    files:
+      - name: about
+        label: About page
+        file: src/content/about/about.md
+        fields:
+          - { name: title, label: Title, widget: string }
+          - { name: body, label: Body, widget: markdown }
+
+  - name: settings
+    label: Settings
+    delete: false
+    files:
+      - name: settings
+        label: Site settings
+        file: src/content/settings/settings.json
+        fields:
+          - { name: email, label: 'Contact email', widget: string }
+          - { name: instagram, label: 'Instagram handle', widget: string }
+          - { name: instagramUrl, label: 'Instagram URL', widget: string }
+          - { name: domain, label: Domain, widget: string }
